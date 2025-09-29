@@ -4,8 +4,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/HomePage";
 import AddJobPage from "./pages/AddJobPage";
-import JobPage from "./pages/JobPage"
-import NotFoundPage from "./pages/NotFoundPage"
+import JobPage from "./pages/JobPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const App = () => {
 
