@@ -16,6 +16,7 @@ const JobPage = () => {
       if (!res.ok) {
         throw new Error("Failed to delete job");
       }
+      navigate("/");
     } catch (error) {
       console.error("Error deleting job:", error);
     }
@@ -39,7 +40,7 @@ const JobPage = () => {
     };
 
     fetchJob();
-  }, []);
+  }, [id]);
 
   const onDeleteClick = (jobId) => {
     const confirm = window.confirm(
@@ -48,7 +49,6 @@ const JobPage = () => {
     if (!confirm) return;
 
     deleteJob(jobId);
-    navigate("/");
   };
 
   return (
@@ -66,6 +66,7 @@ const JobPage = () => {
           <p>Email: {job.company.contactEmail}</p>
           <p>Phone: {job.company.contactPhone}</p>
           <button onClick={() => onDeleteClick(job._id)}>delete</button>
+          <button onClick={() => navigate(`/edit-job/${job._id}`)}>edit</button>
         </>
       )}
     </div>
