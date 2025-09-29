@@ -8,14 +8,22 @@ const JobPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const token = user ? user.token : null;
+
   const deleteJob = async (id) => {
     try {
       const res = await fetch(`/api/jobs/${id}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (!res.ok) {
-        throw new Error("Failed to delete job");
+        const errorText = await res.text();
+        throw new Error(`Failed to delete job: ${errorText}`);
       }
+      console.log("Job deleted successfully");
       navigate("/");
     } catch (error) {
       console.error("Error deleting job:", error);
