@@ -3,7 +3,7 @@ import useSignup from "../hooks/useSignup";        // 引入自定义 hook，用
 import { useNavigate } from "react-router-dom";    // 引入 react-router 的导航 hook，用于注册成功后跳转页面
 
 // 定义注册组件
-const Signup = () => {
+const Signup = ({ setIsAuthenticated }) => {
   const navigate = useNavigate(); // 获取 navigate 方法，后续用来跳转页面
 
   // 使用 useField hook 管理表单字段的值
@@ -36,6 +36,7 @@ const Signup = () => {
     // 如果注册没有报错，跳转到首页
     if (!error) {
       console.log("success");
+      setIsAuthenticated(true);
       navigate("/");
     }
   };

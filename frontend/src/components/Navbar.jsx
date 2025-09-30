@@ -1,40 +1,54 @@
-import { Link } from "react-router-dom"; // 引入 Link 组件，用来实现前端路由跳转（不会刷新页面）
+import { Link } from "react-router-dom";
 
-// 定义导航栏组件
-const Navbar = () => {
-  // 点击“Log out”按钮时调用，清除本地存储中的 user 信息
+// Navbar 组件，接收两个 props：
+// 1. isAuthenticated：表示用户是否已登录
+// 2. setIsAuthenticated：更新登录状态的方法
+const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
+  // 点击 "Log out" 按钮时的处理函数
   const handleClick = (e) => {
-    localStorage.removeItem("user"); // 删除存储在 localStorage 里的登录用户信息
+    // 将登录状态设为 false
+    setIsAuthenticated(false);
+    // 清除本地存储的用户信息
+    localStorage.removeItem("user");
   };
 
   return (
     <nav className="navbar">
-      {/* 网站 Logo / 标题，点击时返回首页 */}
+      {/* 点击标题跳转到首页 */}
       <Link to="/">
         <h1>React Jobs</h1>
       </Link>
 
-      {/* 导航链接区 */}
       <div className="links">
-        <div>
-          {/* 跳转到添加工作页面 */}
-          <Link to="/jobs/add-job">Add Job</Link>
+        {/* 如果用户已登录，显示：添加职位、用户邮箱、退出按钮 */}
+        {isAuthenticated && (
+          <div>
+            {/* 跳转到添加职位页面 */}
+            <Link to="/jobs/add-job">Add Job</Link>
 
-          {/* 跳转到登录页面 */}
-          <Link to="/login">Login</Link>
+            {/* 显示当前用户的邮箱，从 localStorage 里读取 */}
+            <span>{JSON.parse(localStorage.getItem("user")).email}</span>
 
-          {/* 跳转到注册页面 */}
-          <Link to="/signup">Signup</Link>
+            {/* 点击退出，调用 handleClick */}
+            <button onClick={handleClick}>Log out</button>
+          </div>
+        )}
 
-          {/* 点击按钮退出登录（仅清除 localStorage，不会自动跳转） */}
-          <button onClick={handleClick}>Log out</button>          
-        </div>
+        {/* 如果用户未登录，显示：登录、注册按钮 */}
+        {!isAuthenticated && (
+          <div>
+            <Link to="/login">Login</Link>
+            <Link to="/signup">Signup</Link>
+          </div>
+        )}
       </div>
     </nav>
   );
 };
 
-export default Navbar; // 导出导航栏组件
+export default Navbar;
+
+
 
 
 

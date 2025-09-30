@@ -16,6 +16,15 @@ const EditJobPage = () => {
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
 
+  // 从 localStorage 中获取当前登录的用户信息（JSON 字符串 → 对象）
+  // 如果没有保存过 "user"，则 user 为 null
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  // 如果 user 存在，则取出里面的 token；否则为 null
+  // token 会在请求后端接口时放到请求头，用于身份验证
+  const token = user ? user.token : null;
+
+
   const navigate = useNavigate();               // 路由跳转函数
 
   // ---------------- 更新职位函数 ----------------
@@ -25,6 +34,7 @@ const EditJobPage = () => {
         method: "PUT",                          // HTTP PUT 请求更新
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,  //后端会通过这个 token 来验证当前请求是否有权限
         },
         body: JSON.stringify(job),               // 将职位数据转成 JSON
       });
@@ -84,8 +94,10 @@ const EditJobPage = () => {
     const success = await updateJob(updatedJob); // 调用更新函数
     if (success) {
       // 更新成功后跳转到职位详情页
+      console.log("Job Updated Successfully");
       navigate(`/jobs/${id}`);
     } else {
+      console.error("Failed to update the job");
       // 更新失败，可显示错误提示
     }
   };

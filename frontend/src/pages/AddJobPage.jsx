@@ -1,86 +1,88 @@
-import { useState } from "react";         // 引入 React 的 useState，用来管理组件内部状态
-import { useNavigate } from "react-router-dom"; // 引入 useNavigate，用来实现页面跳转
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-// 定义新增工作岗位的页面组件
 const AddJobPage = () => {
-  // 定义状态：职位名称
-  const [title, setTitle] = useState("");
-  // 定义状态：工作类型，默认值为 "Full-Time"
-  const [type, setType] = useState("Full-Time");
-  // 定义状态：职位描述
-  const [description, setDescription] = useState("");
-  // 定义状态：公司名称
-  const [companyName, setCompanyName] = useState("");
-  // 定义状态：联系邮箱
-  const [contactEmail, setContactEmail] = useState("");
-  // 定义状态：联系电话
-  const [contactPhone, setContactPhone] = useState("");
+  // 定义表单输入的状态
+  const [title, setTitle] = useState("");              // 职位标题
+  const [type, setType] = useState("Full-Time");       // 职位类型（默认全职）
+  const [description, setDescription] = useState("");  // 职位描述
+  const [companyName, setCompanyName] = useState("");  // 公司名称
+  const [contactEmail, setContactEmail] = useState(""); // 联系邮箱
+  const [contactPhone, setContactPhone] = useState(""); // 联系电话
 
-  // 获取路由跳转的钩子，用于在提交表单后跳转页面
+  // 从 localStorage 获取当前登录的用户信息
+  const user = JSON.parse(localStorage.getItem("user"));
+  const token = user ? user.token : null;  // 如果存在用户信息，就拿到 token
+
+  // React Router 的钩子，用于跳转页面
   const navigate = useNavigate();
-  
-  // 新增工作岗位的异步函数
+
+  // 发送请求到后端，新增一条职位
   const addJob = async (newJob) => {
     try {
-      // 发送 POST 请求到后端 /api/jobs 接口
+      console.log("Adding job:", newJob);
       const res = await fetch("/api/jobs", {
-        method: "POST", // 请求方式：POST
+        method: "POST",
         headers: {
-          "Content-Type": "application/json", // 请求体内容格式：JSON
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // 通过 token 验证用户身份
         },
-        body: JSON.stringify(newJob), // 把 newJob 对象转成 JSON 字符串
+        body: JSON.stringify(newJob), // 将职位对象转为 JSON 发送
       });
 
-      // 如果返回的状态码不是 2xx，就抛出错误
+      // 如果返回状态码不是 200-299，说明请求失败
       if (!res.ok) {
         throw new Error("Failed to add job");
       }
+      return true;
     } catch (error) {
-      // 捕获错误并输出到控制台
-      console.error(error);
-      return false; // 返回 false 表示添加失败
+      console.error("Error adding job:", error);
+      return false;
     }
-    return true; // 成功时返回 true
   };
-  
-  // 表单提交函数
-  const submitForm = (e) => {
-    e.preventDefault(); // 阻止表单默认刷新页面的行为
 
-    // 构建一个新的工作对象
+  // 表单提交函数
+  const submitForm = async (e) => {
+    e.preventDefault(); // 阻止表单默认刷新页面
+
+    // 组装新的职位对象，结构与后端期望的数据一致
     const newJob = {
-      title,       // 职位名称
-      type,        // 工作类型（如全职、兼职）
-      description, // 工作描述
+      title,
+      type,
+      description,
       company: {
-        name: companyName,   // 公司名称
-        contactEmail,        // 联系邮箱
-        contactPhone,        // 联系电话
+        name: companyName,
+        contactEmail,
+        contactPhone,
       },
     };
 
-    addJob(newJob);     // 调用父组件/上下文传入的函数，新增一个工作
-    return navigate("/"); // 提交后跳转到首页
+    // 调用 addJob 发送请求
+    const success = await addJob(newJob);
+    if (success) {
+      console.log("Job Added Successfully");
+      navigate("/"); // 添加成功后跳转到首页
+    } else {
+      console.error("Failed to add the job");
+    }
   };
-
 
   return (
     <div className="create">
       <h2>Add a New Job</h2>
+
+      {/* 表单提交事件绑定到 submitForm */}
       <form onSubmit={submitForm}>
         <label>Job title:</label>
         <input
           type="text"
           required
-          value={title}                 // 输入框的值绑定到 title 状态
-          onChange={(e) => setTitle(e.target.value)} // 当用户输入时，把输入的值更新到 title 状态
+          value={title}
+          onChange={(e) => setTitle(e.target.value)} // 输入时更新状态
         />
-        <label>Job type:</label>
-        <select 
-          value={type}                           // 下拉框当前选中的值绑定到 state: type
-          onChange={(e) => setType(e.target.value)} // 当用户选择新选项时，把值更新到 type
-        >
 
+        <label>Job type:</label>
+        <select value={type} onChange={(e) => setType(e.target.value)}>
           <option value="Full-Time">Full-Time</option>
           <option value="Part-Time">Part-Time</option>
           <option value="Remote">Remote</option>
@@ -92,8 +94,8 @@ const AddJobPage = () => {
           required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-
         ></textarea>
+
         <label>Company Name:</label>
         <input
           type="text"
@@ -101,21 +103,25 @@ const AddJobPage = () => {
           value={companyName}
           onChange={(e) => setCompanyName(e.target.value)}
         />
+
         <label>Contact Email:</label>
         <input
-          type="text"
+          type="email"
           required
           value={contactEmail}
           onChange={(e) => setContactEmail(e.target.value)}
         />
+
         <label>Contact Phone:</label>
         <input
-          type="text"
+          type="tel"
           required
           value={contactPhone}
           onChange={(e) => setContactPhone(e.target.value)}
         />
-        <button>Add Job</button>
+
+        {/* 提交按钮 */}
+        <button type="submit">Add Job</button>
       </form>
     </div>
   );

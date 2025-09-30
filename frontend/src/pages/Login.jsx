@@ -2,7 +2,7 @@ import useField from "../hooks/useField";     // 自定义 hook，用来处理�
 import useLogin from "../hooks/useLogin";     // 自定义 hook，用来处理登录逻辑
 import { useNavigate } from "react-router-dom"; // React Router 的导航 hook
 
-const Login = () => {
+const Login = ({ setIsAuthenticated }) => {
   const navigate = useNavigate(); // 用于页面跳转
   const email = useField("email");      // 使用自定义 hook 管理 email 输入框
   const password = useField("password"); // 使用自定义 hook 管理 password 输入框
@@ -18,6 +18,7 @@ const Login = () => {
     // 如果没有错误，说明登录成功，跳转到首页
     if (!error) {
       console.log("success");
+      setIsAuthenticated(true);
       navigate("/");
     }
   };

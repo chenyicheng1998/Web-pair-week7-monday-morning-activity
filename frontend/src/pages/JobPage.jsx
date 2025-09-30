@@ -1,22 +1,30 @@
 import { useParams, useNavigate } from "react-router-dom"; // 引入路由钩子
 import { useEffect, useState } from "react";               // 引入 React 状态和副作用钩子
 
-const JobPage = () => {
+const JobPage = ({ isAuthenticated }) => {
   const navigate = useNavigate(); // 获取页面跳转函数
   const { id } = useParams();    // 获取 URL 中的动态参数 id
   const [job, setJob] = useState(null);     // 保存当前职位信息
   const [loading, setLoading] = useState(true); // 是否正在加载数据
   const [error, setError] = useState(null);     // 保存错误信息
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const token = user ? user.token : null;
+
   // 删除职位的异步函数
   const deleteJob = async (id) => {
     try {
       const res = await fetch(`/api/jobs/${id}`, {
         method: "DELETE", // HTTP DELETE 请求
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (!res.ok) {
+        const errorText = await res.text();
         throw new Error("Failed to delete job"); // 如果删除失败，抛出错误
       }
+      console.log("Job deleted successfully");
       navigate("/"); // 删除成功后跳转回首页
     } catch (error) {
       console.error("Error deleting job:", error); // 输出错误
@@ -68,8 +76,13 @@ const JobPage = () => {
           <p>Company: {job.company.name}</p>          {/* 公司名称 */}
           <p>Email: {job.company.contactEmail}</p>    {/* 公司邮箱 */}
           <p>Phone: {job.company.contactPhone}</p>    {/* 公司电话 */}
-          <button onClick={() => onDeleteClick(job._id)}>delete</button> {/* 删除按钮 */}
-          <button onClick={() => navigate(`/edit-job/${job._id}`)}>edit</button> {/* 编辑按钮跳转 */}
+
+          {isAuthenticated && (
+            <>
+              <button onClick={() => onDeleteClick(job._id)}>delete</button> {/* 删除按钮 */}
+              <button onClick={() => navigate(`/edit-job/${job._id}`)}>edit</button> {/* 编辑按钮跳转 */}
+            </>
+          )}
         </>
       )}
     </div>
